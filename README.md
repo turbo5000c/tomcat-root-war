@@ -82,3 +82,4 @@ HTML - [http://localhost:8080/index.html](http://localhost:8080/index.html)
 ## This project used in
 * [Java Web Application (WAR) deployed as root "/" context onto Customized Bitnami Tomcat 9](https://github.com/AndriyKalashnykov/bitnami-tomcat9-jdk18-root-war)
 * [Docker image of this application deployed onto Customized Bitnami Tomcat 9](https://hub.docker.com/r/andriykalashnykov/bitnami-tomcat9-jdk18-root-war)
+* 
