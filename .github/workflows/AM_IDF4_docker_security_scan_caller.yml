@@ -1,0 +1,24 @@
+name: 'AI-test IDF4 CI/CD Workflow'
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  call-reusable-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Reusable Workflow
+        uses: turbo5000c/am-reusable-workflows/.github/workflows/ai-reusable-workflow.yml@develop
+        with:
+          project_code: 'IDF4'
+          repository: ${{ github.repository }}
+          branch: 'main'
+          docker_enabled: false
+          environment: 'production'
+          security_scan_enabled: false
+          artifact_publish_enabled: false
+          secrets_required: false
