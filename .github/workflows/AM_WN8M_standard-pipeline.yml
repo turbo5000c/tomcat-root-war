@@ -8,7 +8,6 @@ on:
       - 'renovate.json'
       - 'README.md'
     branches:
-      - 'main'
       - 'develop'
       - 'feat/**'
   
