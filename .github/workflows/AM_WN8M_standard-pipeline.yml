@@ -1,6 +1,5 @@
 name: WN8M Pipeline
 
-
 on:
   workflow_dispatch:
   push:
