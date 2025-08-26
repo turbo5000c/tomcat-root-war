@@ -1,28 +1,17 @@
-name: Java CI with Maven
+name: WN8M Pipeline
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
-
+    paths-ignore:
+      - '.github/workflows/**'
+      - 'renovate.json'
+      - 'README.md'
+    branches:
+      - 'develop'
+      - 'feat/**'
+  
 jobs:
   build:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 11
-      uses: actions/setup-java@v3
-      with:
-        java-version: '11'
-        distribution: 'temurin'
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-    - name: Run tests
-      run: mvn clean test
-    - name: Build with Maven
-      run: mvn clean compile package
+    uses: turbo5000c/am-reuseable-workflow/.github/workflows/AM_WN8M_main-workflow.yml@main
+    secrets: inherit
