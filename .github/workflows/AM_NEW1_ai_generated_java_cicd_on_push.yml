@@ -1,45 +1,39 @@
-name: NEW1 CI/CD Workflow
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
+name: ai_generated_java_cicd_on_push
+on: workflow_dispatch
 jobs:
   build:
-    name: Build and Test
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'adopt'
-        java-version: '11'
-
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-
-    - name: Run unit tests
-      run: mvn test
-
-  deploy:
-    name: Deploy to Production
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          distribution: adopt
+          java-version: '11'
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+      - name: Run unit tests
+        run: mvn test
+    name: Build and Test
+  security_scan:
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
     steps:
-    - name: Deploy to Tomcat
-      uses: turbo5000c/tomcat-root-war@v1
-      with:
-        war-file: 'target/*.war'
-        tomcat-url: ${{ secrets.TOMCAT_URL }}
-        username: ${{ secrets.TOMCAT_USERNAME }}
-        password: ${{ secrets.TOMCAT_PASSWORD }}
+      - name: Scan code for security vulnerabilities
+        uses: github/codeql-action/analyze@v2
+  container_build:
+    runs-on: ubuntu-latest
+    needs: security_scan
+    steps:
+      - name: Set up Docker
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Build Docker image
+        run: |
+          docker build . -t my-java-app
+      - name: Push Docker image to registry
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker push my-java-app
