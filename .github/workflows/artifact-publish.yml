@@ -1,33 +1,25 @@
-name: Release artifact to Nexus
+name: Deploy existing artifact to Nexus
 
 on:
   workflow_dispatch:
     inputs:
-      java_version:
-        description: "JDK version"
+      # GitHub download info
+      source_repo:
+        description: "GitHub repo to download from (owner/repo)"
         required: true
-        default: "17"
+      release_tag:
+        description: "Release tag (e.g. v1.2.3)"
+        required: true
+      asset_name:
+        description: "Exact asset filename to download (e.g. my-app-1.2.3.jar)"
+        required: true
 
-      maven_goals:
-        description: "Maven goals to build the artifact"
-        required: true
-        default: "clean package -DskipTests"
-
-      # Where to deploy
-      nexus_repo_url:
-        description: "Nexus repository URL (e.g. https://nexus.local.xyz/repository/releases)"
-        required: true
-      nexus_repo_id:
-        description: "Maven server id for Nexus (matches <server><id> in settings.xml)"
-        required: true
-        default: "nexus"
-
-      # What to deploy
+      # Maven coordinates
       group_id:
         description: "groupId (e.g. com.acme)"
         required: true
       artifact_id:
-        description: "artifactId (e.g. my-service)"
+        description: "artifactId (e.g. my-app)"
         required: true
       version:
         description: "version (e.g. 1.2.3)"
@@ -41,72 +33,95 @@ on:
         required: false
         default: ""
 
-      artifact_path:
-        description: "path to built artifact file (e.g. target/my-service-1.2.3.jar)"
-        required: true
+      # Paths
       pom_path:
-        description: "path to pom.xml to deploy (usually pom.xml)"
+        description: "Path to pom.xml in this repo"
         required: true
         default: "pom.xml"
+      download_dir:
+        description: "Directory to download artifact into"
+        required: true
+        default: "artifact"
+
+      # Nexus
+      nexus_repo_url:
+        description: "Nexus repository URL (e.g. https://nexus.local.xyz/repository/releases)"
+        required: true
+      nexus_repo_id:
+        description: "Maven server id (matches settings.xml)"
+        required: true
+        default: "nexus"
 
 jobs:
-  release:
+  deploy:
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
-      - name: Checkout
+      - name: Checkout (for pom.xml)
         uses: actions/checkout@v4
 
-      - name: Set up JDK (and Maven settings.xml for Nexus)
+      - name: Set up JDK 17 + Maven settings for Nexus
         uses: actions/setup-java@v5
         with:
-          java-version: ${{ inputs.java_version }}
+          java-version: "17"
           distribution: temurin
-          cache: maven
           server-id: ${{ inputs.nexus_repo_id }}
           server-username: NEXUS_USERNAME
           server-password: NEXUS_PASSWORD
           settings-path: ${{ github.workspace }}
 
-      - name: Build with Maven
-        shell: bash
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+      - name: Download artifact from GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          mvn -B ${{ inputs.maven_goals }}
 
-      - name: Verify inputs/files
-        shell: bash
+          mkdir -p "${{ inputs.download_dir }}"
+
+          gh release download "${{ inputs.release_tag }}" \
+            --repo "${{ inputs.source_repo }}" \
+            --pattern "${{ inputs.asset_name }}" \
+            --dir "${{ inputs.download_dir }}"
+
+          echo "Downloaded files:"
+          ls -l "${{ inputs.download_dir }}"
+
+      - name: Verify files
         run: |
           set -euo pipefail
 
-          echo "Using settings: $GITHUB_WORKSPACE/settings.xml"
-          echo "POM path:      ${{ inputs.pom_path }}"
-          echo "Artifact path: ${{ inputs.artifact_path }}"
-          echo "Repo URL:      ${{ inputs.nexus_repo_url }}"
-          echo "Repo ID:       ${{ inputs.nexus_repo_id }}"
-          echo "GAV:           ${{ inputs.group_id }}:${{ inputs.artifact_id }}:${{ inputs.version }}"
-          echo "Packaging:     ${{ inputs.packaging }}"
-          echo "Classifier:    ${{ inputs.classifier }}"
+          ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.asset_name }}"
+          POM_PATH="${{ inputs.pom_path }}"
 
-          if [[ ! -f "${{ inputs.pom_path }}" ]]; then
-            echo "ERROR: pom.xml not found at ${{ inputs.pom_path }}"
+          echo "Artifact path: $ARTIFACT_PATH"
+          echo "POM path:      $POM_PATH"
+
+          if [[ ! -f "$ARTIFACT_PATH" ]]; then
+            echo "ERROR: Artifact not found"
             exit 1
           fi
 
-          if [[ ! -f "${{ inputs.artifact_path }}" ]]; then
-            echo "ERROR: artifact file not found at ${{ inputs.artifact_path }}"
-            echo "Build output (target/):"
-            ls -la target || true
+          if [[ ! -f "$POM_PATH" ]]; then
+            echo "ERROR: pom.xml not found"
             exit 1
           fi
 
-      - name: Deploy to Nexus
-        shell: bash
+      - name: Deploy artifact to Nexus
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: |
           set -euo pipefail
+
+          ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.asset_name }}"
 
           MVN_ARGS=(
             -B
@@ -118,8 +133,8 @@ jobs:
             "-DartifactId=${{ inputs.artifact_id }}"
             "-Dversion=${{ inputs.version }}"
             "-Dpackaging=${{ inputs.packaging }}"
+            "-Dfile=$ARTIFACT_PATH"
             "-DpomFile=${{ inputs.pom_path }}"
-            "-Dfile=${{ inputs.artifact_path }}"
             "-DgeneratePom=false"
           )
 
@@ -127,9 +142,4 @@ jobs:
             MVN_ARGS+=("-Dclassifier=${{ inputs.classifier }}")
           fi
 
-          # If you're deploying a POM-only artifact, you typically set packaging=pom
-          # and artifact_path should point to the POM as well.
           mvn "${MVN_ARGS[@]}"
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
