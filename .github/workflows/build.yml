@@ -19,7 +19,7 @@ jobs:
     strategy:
 
       matrix:
-        java: [ '11', '18', '25' ]
+        java: ['25' ]
         java-distro: [ 'temurin' ]
 
     steps:
@@ -37,3 +37,6 @@ jobs:
       run: |
         mvn -B package --file pom.xml
         ls -l ./target/
+
+
+        
