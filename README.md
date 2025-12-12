@@ -1,6 +1,6 @@
 [![Build Maven](https://github.com/AndriyKalashnykov/tomcat-root-war/actions/workflows/build.yml/badge.svg)](https://github.com/AndriyKalashnykov/tomcat-root-war/actions/workflows/build.yml)
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FAndriyKalashnykov%2Ftomcat-root-war&count_bg=%2333CD56&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Hits](https://hits.sh/github.com/AndriyKalashnykov/tomcat-root-war.svg?view=today-total&style=plastic)](https://hits.sh/github.com/AndriyKalashnykov/tomcat-root-war/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 # Java Web Application example
 
 ROOT.war replaces Tomcat's default ROOT application - $TOMCAT_HOME/webapps/ROOT
@@ -9,19 +9,19 @@ ROOT.war replaces Tomcat's default ROOT application - $TOMCAT_HOME/webapps/ROOT
 
 * [sdkman](https://sdkman.io/install)
 
-    Install and use JDK 18
+    Install and use JDK
 
     ```bash
-    sdk install java 18.0.2-tem
-    sdk use java 18.0.2-tem
+    sdk install java 25.0.1-tem
+    sdk use java 25.0.1-tem
     ```
 * [Apache Maven](https://maven.apache.org/install.html)
 
-  Install Apache Maven 3.9.0
+  Install Apache Maven 3.9.11
 
     ```bash
-    sdk install maven 3.9.0
-    sdk use maven 3.9.0
+    sdk install maven 3.9.11
+    sdk use maven 3.9.11
     ```
 * [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 
@@ -43,6 +43,12 @@ Access http://localhost:8080/index.html or see [Tomcat ROOT WAR Web Application 
 git clone git@github.com:AndriyKalashnykov/tomcat-root-war.git
 cd tomcat-root-war
 mvn clean install
+```
+
+### Building WAR in a Secure environmets that enforce SSL
+
+```shell
+mvn clean install -Daether.connector.https.securityMode=insecure -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true
 ```
 
 ## List content of generated WAR file
