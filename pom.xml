@@ -5,7 +5,7 @@
     <groupId>com.example</groupId>
     <artifactId>tomcat-root-war</artifactId>
     <packaging>war</packaging>
-    <version>1.0</version>
+    <version>1.1.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -57,4 +57,19 @@
             </plugin>
         </plugins>
     </build>
+	<!-- *************************************************************** -->
+	<!--               Distribution Management                           -->
+	<!-- *************************************************************** -->
+	<distributionManagement>
+		<repository>
+			<id>nexus</id>
+			<name>nsf-nexus releases</name>
+			<url>http://192.168.50.98:8081/repository/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus</id>
+			<name>nsf-nexus snapshots</name>
+			<url>https://192.168.50.98:8081/repository/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 </project>
