@@ -38,5 +38,29 @@ jobs:
         mvn -B package --file pom.xml
         ls -l ./target/
 
+    - name: 🧾 Generating Maven Vars
+      if: hashFiles('repo/pom.xml') != ''
+      working-directory: repo
+      run: |
+        set -e
 
-        
+        echo "==> Reading Maven coordinates from pom.xml"
+
+        maven_eval() {
+          local expr="$1"
+          mvn --settings "$GITHUB_WORKSPACE/nexus-settings.xml" \
+              help:evaluate -Dexpression="$expr" -q -DforceStdout 2>/dev/null \
+            | tr -d '\r' \
+            | grep -E '^[0-9A-Za-z._-]+$' \
+            | tail -n1
+        }
+
+        ARTIFACT_VERSION=$(maven_eval "project.version")
+        ARTIFACT_GROUP_ID=$(maven_eval "project.groupId")
+        ARTIFACT_ID=$(maven_eval "project.artifactId")
+
+    - name: "Upload build artifacts: artifacts"
+      uses: actions/upload-artifact@v4
+      with:
+        name: artifacts
+        path: ./target/
