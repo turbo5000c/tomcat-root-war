@@ -34,7 +34,7 @@ jobs:
       run: |
         set -euo pipefail
         mkdir -p "$HOME/.m2"
-        printf '%s' "${{ secrets.SETTINGS_XML }}" > "$HOME/.m2/settings.xml"
+        echo "${{ secrets.SETTINGS_XML }}" > "$HOME/.m2/settings.xml"
         chmod 600 "$HOME/.m2/settings.xml"
 
     - name: Build with Maven
