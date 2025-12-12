@@ -59,6 +59,10 @@ jobs:
         ARTIFACT_GROUP_ID=$(maven_eval "project.groupId")
         ARTIFACT_ID=$(maven_eval "project.artifactId")
 
+    - name: Run ID
+      run: | 
+        echo "runid: ${{ github.run_id }}"
+
     - name: "Upload build artifacts: artifacts"
       uses: actions/upload-artifact@v4
       with:
