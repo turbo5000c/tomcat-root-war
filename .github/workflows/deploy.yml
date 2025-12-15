@@ -12,12 +12,6 @@ on:
         description: "the Run ID in the build"
         required: true
         default: "20242170031"
-        
-      # Paths
-      pom_path:
-        description: "Path to pom.xml in this repo"
-        required: true
-        default: "pom.xml"
       target_dir:
         description: "Path to pom.xml in this repo"
         required: true
@@ -54,8 +48,6 @@ jobs:
           java-version: "17"
           distribution: temurin
           server-id: ${{ inputs.nexus_repo_id }}
-          server-username: NEXUS_USERNAME
-          server-password: NEXUS_PASSWORD
           settings-path: ${{ github.workspace }}
 
 
@@ -66,11 +58,10 @@ jobs:
           set -euo pipefail
 
           mkdir -p "${{ inputs.download_dir }}"
-
           
-          gh run download $ARTIFACT_RUN_ID \
-          --repo $GITHUB_ORG_REPO \
-          --name "$ARTIFACT_NAME" \
+          gh run download ${{ inputs.run_id }} \
+          --repo "turbo5000c/tomcat-root-war" \
+          --name "./target/" \
           --dir "${{ inputs.download_dir }}"
           
           echo "Downloaded files:"
@@ -101,31 +92,15 @@ jobs:
           fi
 
       - name: Deploy artifact to Nexus
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: |
           set -euo pipefail
+          
+          ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.target_dir }}"
+          POM_PATH="${{ inputs.download_dir }}/${{ inputs.pom_path }}"
 
-          ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.asset_name }}"
-
-          MVN_ARGS=(
-            -B
-            --settings "$GITHUB_WORKSPACE/settings.xml"
-            deploy:deploy-file
-            "-Durl=${{ inputs.nexus_repo_url }}"
-            "-DrepositoryId=${{ inputs.nexus_repo_id }}"
-            "-DgroupId=${{ inputs.group_id }}"
-            "-DartifactId=${{ inputs.artifact_id }}"
-            "-Dversion=${{ inputs.version }}"
-            "-Dpackaging=${{ inputs.packaging }}"
-            "-Dfile=$ARTIFACT_PATH"
-            "-DpomFile=${{ inputs.pom_path }}"
-            "-DgeneratePom=false"
-          )
-
-          if [[ -n "${{ inputs.classifier }}" ]]; then
-            MVN_ARGS+=("-Dclassifier=${{ inputs.classifier }}")
-          fi
-
-          mvn "${MVN_ARGS[@]}"
+          mvn -B deploy:deploy-file \
+            --settings ~/.m2/nexus-settings.xml \
+            -Durl="${{ inputs.nexus_repo_url }}" \
+            -DrepositoryId="${{ inputs.nexus_repo_id }}" \
+            -Dfile="$ARTIFACT_PATH" \
+            -DpomFile="$POM_PATH"
