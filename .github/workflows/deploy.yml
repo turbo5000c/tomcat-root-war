@@ -19,7 +19,7 @@ on:
       download_dir:
         description: "Directory to download artifact into"
         required: true
-        default: "artifact"
+        default: "artifacts"
 
       # Nexus
       nexus_repo_url:
@@ -61,7 +61,7 @@ jobs:
           
           gh run download ${{ inputs.run_id }} \
           --repo "turbo5000c/tomcat-root-war" \
-          --name "artifact" \
+          --name "artifacts" \
           --dir "${{ inputs.download_dir }}"
           
           echo "Downloaded files:"
