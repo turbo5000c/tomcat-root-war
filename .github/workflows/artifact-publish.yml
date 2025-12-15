@@ -54,8 +54,8 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-
+    runs-on: tomcat
+    
     permissions:
       contents: read
 
@@ -99,7 +99,7 @@ jobs:
           set -euo pipefail
 
           ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.asset_name }}"
-          POM_PATH="${{ inputs.pom_path }}"
+          POM_PATH="${{ inputs.download_dir }}/${{ inputs.pom_path }}"
 
           echo "Artifact path: $ARTIFACT_PATH"
           echo "POM path:      $POM_PATH"
