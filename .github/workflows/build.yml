@@ -32,7 +32,7 @@ jobs:
 
     - name: Build with Maven
       run: |
-        mvn -B deploy --file pom.xml
+        mvn -B deploy --settings ~/.m2/nexus-settings.xml --file pom.xml
         ls -l ./target/
 
     - name: Run ID
