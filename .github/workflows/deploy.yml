@@ -7,37 +7,21 @@ on:
       source_repo:
         description: "GitHub repo to download from (owner/repo)"
         required: true
-      release_tag:
-        description: "Release tag (e.g. v1.2.3)"
+        default: "turbo5000c/tomcat-root-war"
+      run_id:
+        description: "the Run ID in the build"
         required: true
-      asset_name:
-        description: "Exact asset filename to download (e.g. my-app-1.2.3.jar)"
-        required: true
-
-      # Maven coordinates
-      group_id:
-        description: "groupId (e.g. com.acme)"
-        required: true
-      artifact_id:
-        description: "artifactId (e.g. my-app)"
-        required: true
-      version:
-        description: "version (e.g. 1.2.3)"
-        required: true
-      packaging:
-        description: "packaging (jar, war, pom, etc.)"
-        required: true
-        default: "jar"
-      classifier:
-        description: "optional classifier (leave blank if none)"
-        required: false
-        default: ""
-
+        default: "20242170031"
+        
       # Paths
       pom_path:
         description: "Path to pom.xml in this repo"
         required: true
         default: "pom.xml"
+      target_dir:
+        description: "Path to pom.xml in this repo"
+        required: true
+        default: "target"      
       download_dir:
         description: "Directory to download artifact into"
         required: true
@@ -47,6 +31,7 @@ on:
       nexus_repo_url:
         description: "Nexus repository URL (e.g. https://nexus.local.xyz/repository/releases)"
         required: true
+        default: "https://nexus.local.updawg.xyz/repository/maven-releases/"
       nexus_repo_id:
         description: "Maven server id (matches settings.xml)"
         required: true
@@ -82,11 +67,12 @@ jobs:
 
           mkdir -p "${{ inputs.download_dir }}"
 
-          gh release download "${{ inputs.release_tag }}" \
-            --repo "${{ inputs.source_repo }}" \
-            --pattern "${{ inputs.asset_name }}" \
-            --dir "${{ inputs.download_dir }}"
-
+          
+          gh run download $ARTIFACT_RUN_ID \
+          --repo $GITHUB_ORG_REPO \
+          --name "$ARTIFACT_NAME" \
+          --dir "${{ inputs.download_dir }}"
+          
           echo "Downloaded files:"
           ls -l "${{ inputs.download_dir }}"
 
@@ -94,17 +80,21 @@ jobs:
         run: |
           set -euo pipefail
 
-          ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.asset_name }}"
+          ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.target_dir }}"
           POM_PATH="${{ inputs.download_dir }}/${{ inputs.pom_path }}"
 
           echo "Artifact path: $ARTIFACT_PATH"
+          ls -l $ARTIFACT_PATH
+          
           echo "POM path:      $POM_PATH"
+          ls -l $POM_PATH
 
           if [[ ! -f "$ARTIFACT_PATH" ]]; then
             echo "ERROR: Artifact not found"
             exit 1
           fi
-
+          
+          ls -l $POM_PATH
           if [[ ! -f "$POM_PATH" ]]; then
             echo "ERROR: pom.xml not found"
             exit 1
