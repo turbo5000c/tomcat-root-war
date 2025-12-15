@@ -71,7 +71,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.target_dir }}"
+          ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.target_dir }}/ROOT.war"
           POM_PATH="${{ inputs.download_dir }}/${{ inputs.pom_path }}"
 
           echo "Artifact path: $ARTIFACT_PATH"
@@ -95,7 +95,7 @@ jobs:
         run: |
           set -euo pipefail
           
-          ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.target_dir }}"
+          ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.target_dir }}/ROOT.war"
           POM_PATH="${{ inputs.download_dir }}/${{ inputs.pom_path }}"
 
           mvn -B deploy:deploy-file \
