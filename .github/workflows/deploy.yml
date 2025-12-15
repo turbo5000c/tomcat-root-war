@@ -72,7 +72,7 @@ jobs:
           set -euo pipefail
 
           ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.target_dir }}/ROOT.war"
-          POM_PATH="${{ inputs.download_dir }}/${{ inputs.pom_path }}"
+          POM_PATH="${{ inputs.download_dir }}/${{ inputs.pom_path }}/pom.xml"
 
           echo "Artifact path: $ARTIFACT_PATH"
           ls -l $ARTIFACT_PATH
@@ -96,7 +96,7 @@ jobs:
           set -euo pipefail
           
           ARTIFACT_PATH="${{ inputs.download_dir }}/${{ inputs.target_dir }}/ROOT.war"
-          POM_PATH="${{ inputs.download_dir }}/${{ inputs.pom_path }}"
+          POM_PATH="${{ inputs.download_dir }}/${{ inputs.pom_path }}/pom.xml"
 
           mvn -B deploy:deploy-file \
             --settings ~/.m2/nexus-settings.xml \
