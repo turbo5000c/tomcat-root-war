@@ -61,7 +61,7 @@ jobs:
           
           gh run download ${{ inputs.run_id }} \
           --repo "turbo5000c/tomcat-root-war" \
-          --name "./target/" \
+          --name "artifact" \
           --dir "${{ inputs.download_dir }}"
           
           echo "Downloaded files:"
