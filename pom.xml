@@ -64,12 +64,12 @@
 		<repository>
 			<id>nexus</id>
 			<name>nsf-nexus releases</name>
-			<url>http://192.168.50.98:8081/repository/releases</url>
+			<url>https://nexus.local.updawg.xyz/repository/releases</url>
 		</repository>
 		<snapshotRepository>
 			<id>nexus</id>
 			<name>nsf-nexus snapshots</name>
-			<url>https://192.168.50.98:8081/repository/snapshots</url>
+			<url>https://nexus.local.updawg.xyz/repository/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 </project>
