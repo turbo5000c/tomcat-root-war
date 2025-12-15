@@ -73,10 +73,6 @@ jobs:
           server-password: NEXUS_PASSWORD
           settings-path: ${{ github.workspace }}
 
-      - name: Install GitHub CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gh
 
       - name: Download artifact from GitHub release
         env:
