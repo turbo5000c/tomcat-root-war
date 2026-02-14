@@ -25,4 +25,4 @@ jobs:
         run: |
           APP_VERSION=$(node -p "require('./package.json').version")
           echo "The version is $APP_VERSION
-    name: Build9
+    name: Build90
